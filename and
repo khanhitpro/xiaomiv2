@@ -44,14 +44,14 @@ check_adb() {
 install_apk() {
     local apk_file="$1"
     if [ -f "$apk_file" ]; then
-        echo -e "→ Cài ${GREEN}$apk_file${NC}"
+        echo -e "→ Đang Cài Ứng Dụng ${GREEN}$apk_file${NC}"
         if $ADB_COMMAND install -r -g "$apk_file"; then
-            echo -e "${GREEN}✓ Thành công${NC}"
+            echo -e "${GREEN}✓ Đã Cài Thành Công${NC}"
         else
-            echo -e "${RED}✗ Thất bại${NC}"
+            echo -e "${RED}✗ Lỗi File Cài Thất bại${NC}"
         fi
     else
-        echo -e "${RED}⚠ Không thấy $apk_file${NC}"
+        echo -e "${RED}⚠ Không thấy File Cài $apk_file${NC}"
     fi
 }
 
@@ -116,7 +116,7 @@ menu1() {
         else
             echo -e "${RED}⛔ Đã thử 6 lần thất bại. KIỂM TRA lại IP hoặc ADB Debugging trên TV ĐÃ BẬT CHƯA.${NC}"
 			echo -e "${RED}⛔ Vui lòng kiểm tra lại IP hoặc BẤM ĐỒNG Ý CHO PHÉP ĐIỆN THOẠI KẾT NỐI ĐẾN TIVI.${NC}"
-            sleep 3
+            sleep 5
             # Không dùng exit, chỉ tiếp tục vòng lặp while true để quay lại nhập IP
         fi
     done
@@ -136,8 +136,8 @@ menu2() {
         PANEL=$($ADB_COMMAND shell getprop ro.boot.mi.panel_size 2>/dev/null | tr -d '\r')
         SERIAL=$($ADB_COMMAND shell getprop ro.serialno | tr -d '\r')
 		echo -e "${YELLOW}────────────────────────────────────────${NC}"
-        echo -e "${CYAN}📱 ${BRAND} ${MODEL}${NC} | 📺Tivi ${PANEL:-N/A}Inch"
-        echo -e "${CYAN}🤖 Android ${ANDROID} (API ${SDK})${NC} | ⚙️ ${BUILD}"
+        echo -e "${CYAN}📱 ${BRAND} ${MODEL}${NC} | 📺  Tivi ${PANEL:-N/A}Inch"
+        echo -e "${CYAN}🤖 Android ${ANDROID} (API ${SDK})${NC} | ⚙️   ${BUILD}"
         echo -e "${CYAN}🆔 Seri Tivi ${SERIAL}${NC}"
         echo -e "${YELLOW}────────────────────────────────────────${NC}"
         echo
@@ -209,7 +209,7 @@ install_projectivy() {
 
     local apks_to_install="mistore.apk keyboard.apk katniss_2.2.0.apk allapp.apk down.apk mitv.apk an.apk youtube.apk phim4k.apk getout.apk"
 
-    echo "🚀 Bắt đầu cài đặt các ứng dụng phụ trợ..."
+    echo "🚀 Bắt đầu cài đặt Thêm Các App cần thiết..."
     for apk in $apks_to_install; do
         install_apk "$apk"
     done
@@ -225,7 +225,7 @@ install_projectivy() {
     local appops_perms="REQUEST_INSTALL_PACKAGES WRITE_SETTINGS MANAGE_EXTERNAL_STORAGE"
     local runtime_perms="android.permission.READ_EXTERNAL_STORAGE android.permission.WRITE_EXTERNAL_STORAGE android.permission.READ_MEDIA_IMAGES android.permission.READ_MEDIA_VIDEO android.permission.READ_MEDIA_AUDIO"
 
-    echo -e "${YELLOW}🔑 ĐANG CẤP QUYỀN ỨNG DỤNG...${NC}"
+    echo -e "${YELLOW}🔑 ĐANG CẤP QUYỀN GIAO DIỆN TIẾNG VIỆT...${NC}"
 
     # Đếm tổng số lượng app trong danh sách chuẩn POSIX
     local total_apps=0
@@ -376,7 +376,7 @@ install_X_S_2026() {
 
     local apks_to_install="mistore.apk keyboard.apk katniss_2.2.0.apk allapp.apk down.apk mitv.apk an.apk youtube.apk phim4k.apk getout.apk"
 
-    echo "🚀 Bắt đầu cài đặt các ứng dụng phụ trợ..."
+    echo "🚀 Bắt đầu cài đặt THÊM CÁC ỨNG DỤNG KHÁC..."
     for apk in $apks_to_install; do
         install_apk "$apk"
     done
@@ -497,7 +497,7 @@ install_X_S_2026() {
     $ADB_COMMAND shell settings list secure >/dev/null 2>&1
     $ADB_COMMAND shell sync >/dev/null 2>&1
     
-    echo -e "${GREEN}✅ Cài đặt Projectivy hoàn tất!${NC}"
+    echo -e "${GREEN}✅ Cài đặt GIAO DIỆN Projectivy hoàn tất !${NC}"
     sleep 2
     echo "Đang gửi lệnh khởi động lại..."
     $ADB_COMMAND reboot >/dev/null 2>&1 &
@@ -513,7 +513,7 @@ install_X_S_2026() {
 
 # Sao chép ảnh nền vào TV
 copy_wallpapers() {
-    echo "🖼️ Bắt đầu chép ảnh nền vào TV..."
+    echo "🖼️ Bắt đầu tải ảnh lên TV của bạn..."
     local count=0
     
     for file in *; do
@@ -521,7 +521,7 @@ copy_wallpapers() {
         case "$file" in
             *.jpg|*.jpeg|*.png|*.JPG|*.JPEG|*.PNG)
                 local extension="${file##*.}"
-                echo "    -> Đang chép $file..."
+                echo "    -> Đang tải ảnh $file..."
                 $ADB_COMMAND push "$file" "/sdcard/DCIM_${count}.${extension}" >/dev/null 2>&1
                 count=$((count + 1))
                 ;;
@@ -531,7 +531,7 @@ copy_wallpapers() {
     if [ "$count" -eq 0 ]; then
         echo -e "   ${YELLOW}⚠️ Không tìm thấy file ảnh nào.${NC}"
     else
-        echo -e "${GREEN}✅ Đã chép $count ảnh vào thư mục /sdcard/DCIM/ trên TV.${NC}"
+        echo -e "${GREEN}✅ Đã tải $count ảnh vào thư mục /sdcard/DCIM/ trên TV.${NC}"
     fi
     sleep 3
 }
