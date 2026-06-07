@@ -64,71 +64,46 @@ menu1() {
     while true; do
         print_header
         echo -e "${BLUE}📡 MENU KẾT NỐI TIVI XIAOMI PRO${NC}"
-        # ... (giữ nguyên phần hướng dẫn giao diện của bạn) ...
-        echo -e "${BLUE}────────────────────────────${NC}"
-        echo ""
-        echo -e "${MAGENTA}📺 HƯỚNG DẪN KẾT NỐI TIVI${NC}\n"
-        echo -e "${CYAN}🎮 Điều khiển:${NC} ${YELLOW}↑ lên trên cùng${NC} → ${WHITE}Cài đặt ⚙${NC}"
-        echo -e "${CYAN}🌐 Ngôn ngữ :${NC} ${YELLOW}↓ 4 lần${NC} → ${WHITE}Language${NC} → ${GREEN}English${NC}"
-        echo -e "${CYAN}🔓 Developer:${NC} ${WHITE}About${NC} → ${YELLOW}Model${NC} → ${GREEN}OK 9 lần${NC}"
-        echo -e "${CYAN}⚙️  Quyền    :${NC} ${GREEN}ADB Debugging${NC} + ${GREEN}Unknown Sources${NC}"
-        echo -e "${CYAN}⛔ Lưu ý    :${NC} ${RED}Tắt Update tự động${NC}"
-        echo -e "${CYAN}📶 Thiết bị :${NC} ${YELLOW}${DEVICE_IP}${NC} | ${GREEN}Android ${ANDROID}${NC}"
-        echo ""
-        echo -e "${BLUE}────────────────────────────${NC}"
-        echo
+        
         read -p "$(echo -e "${GREEN}📶 Nhập IP Tivi:${NC} ")" RAW_IP
         [ -z "$RAW_IP" ] && continue
 
-        # Định dạng lại IP
         [[ "$RAW_IP" != *":5555" ]] && DEVICE_IP="${RAW_IP}:5555" || DEVICE_IP="$RAW_IP"
 
         local retry_count=0
         local max_retries=2
-        local success=false
+        local connected=false
 
-        # Vòng lặp thử kết nối
         while [ $retry_count -le $max_retries ]; do
-            echo -e "\n→ ${CYAN}Đang thử kết nối... (Lần ${((retry_count + 1))}/${((max_retries + 1))})${NC}"
+            echo -e "\n→ ${CYAN}Đang thử kết nối (Lần $((retry_count + 1)))...${NC}"
             
             $ADB_COMMAND disconnect >/dev/null 2>&1
             $ADB_COMMAND connect "$DEVICE_IP" >/dev/null 2>&1
             
-            # Chờ một chút để TV phản hồi
-            sleep 3
+            sleep 3 # Đợi TV nhận tín hiệu
 
-            # Kiểm tra xem thiết bị đã "device" chưa (thay vì chỉ "offline")
-            if $ADB_COMMAND devices | grep -q "$DEVICE_IP.*device$"; then
-                echo -e "${GREEN}✓ Kết nối thành công!${NC}"
-                success=true
+            # Kiểm tra trạng thái thiết bị
+            if $ADB_COMMAND devices | grep -q "$DEVICE_IP.*device"; then
+                connected=true
                 break
             else
-                echo -e "${RED}✗ Kết nối thất bại ở lần ${((retry_count + 1))}${NC}"
-                ((retry_count++))
+                echo -e "${RED}✗ Không kết nối được. Đang thử lại...${NC}"
+                # Dùng let để tăng biến, tránh lỗi cú pháp
+                let "retry_count++"
             fi
         done
 
-        # Quyết định hành động sau khi thử xong
-        if [ "$success" = true ]; then
-            # Lấy thông tin thiết bị tại đây...
-            MODEL=$($ADB_COMMAND shell getprop ro.product.model | tr -d '\r')
-            BRAND=$($ADB_COMMAND shell getprop ro.product.brand | tr -d '\r')
-            ANDROID=$($ADB_COMMAND shell getprop ro.build.version.release | tr -d '\r')
-            SDK=$($ADB_COMMAND shell getprop ro.build.version.sdk | tr -d '\r')
-            BUILD=$($ADB_COMMAND shell getprop ro.build.version.incremental | tr -d '\r')
-            PANEL=$($ADB_COMMAND shell getprop ro.boot.mi.panel_size 2>/dev/null | tr -d '\r')
-            SERIAL=$($ADB_COMMAND shell getprop ro.serialno | tr -d '\r')
-            
-            echo -e "${YELLOW}────────────────────────────────────────${NC}"
-            echo -e "${CYAN}📱 Đã kết nối tới ${DEVICE_IP}${NC}"
-            echo -e "${YELLOW}────────────────────────────────────────${NC}"
-            
-            sleep 2
+        if [ "$connected" = true ]; then
+            echo -e "${GREEN}✓ Kết nối thành công!${NC}"
+            # Gán IP đã kết nối vào biến toàn cục để dùng cho menu2
+            export DEVICE_IP
+            sleep 1
             menu2
-            break # Thoát khỏi vòng lặp while true ở menu1
+            break 
         else
-            echo -e "${RED}⛔ Đã thử 3 lần không thành công. Quay lại màn hình nhập IP...${NC}"
-            sleep 2
+            echo -e "${RED}⛔ Đã thử 3 lần thất bại. Vui lòng kiểm tra lại IP hoặc ADB Debugging trên TV.${NC}"
+            sleep 3
+            # Không dùng exit, chỉ tiếp tục vòng lặp while true để quay lại nhập IP
         fi
     done
 }
