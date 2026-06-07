@@ -97,21 +97,25 @@ menu1() {
                 connected=true
                 break
             else
-                echo -e "${RED}✗ Không kết nối được. Đang thử lại...${NC}"
+                echo -e "${RED}✗ Bấm OK trên điều khiển để tích vào ô đồng ý...${NC}"
+				echo -e "${RED}✗ Sau đó bấm phím xuống -> Sang phải -> Alown/OK${NC}"
                 # Dùng let để tăng biến, tránh lỗi cú pháp
                 let "retry_count++"
             fi
         done
 
         if [ "$connected" = true ]; then
-            echo -e "${GREEN}✓ Kết nối thành công!${NC}"
+            echo -e "${GREEN}✓ Kết nối thành công đến tivi !${NC}"
+			echo -e "${GREEN}✓ Chào mừng bạn đến với MENU CÀI ĐẶT !${NC}"
+			echo -e "📱 TV đang kết nối tại: ${GREEN}$DEVICE_IP${NC}"
             # Gán IP đã kết nối vào biến toàn cục để dùng cho menu2
             export DEVICE_IP
             sleep 1
             menu2
             break 
         else
-            echo -e "${RED}⛔ Đã thử 5 lần thất bại. Vui lòng kiểm tra lại IP hoặc ADB Debugging trên TV.${NC}"
+            echo -e "${RED}⛔ Đã thử 6 lần thất bại. KIỂM TRA lại IP hoặc ADB Debugging trên TV ĐÃ BẬT CHƯA.${NC}"
+			echo -e "${RED}⛔ Vui lòng kiểm tra lại IP hoặc BẤM ĐỒNG Ý CHO PHÉP ĐIỆN THOẠI KẾT NỐI ĐẾN TIVI.${NC}"
             sleep 3
             # Không dùng exit, chỉ tiếp tục vòng lặp while true để quay lại nhập IP
         fi
