@@ -64,14 +64,24 @@ menu1() {
     while true; do
         print_header
         echo -e "${BLUE}📡 MENU KẾT NỐI TIVI XIAOMI PRO${NC}"
-        
+        echo -e "${BLUE}────────────────────────────${NC}"
+        echo ""
+        echo -e "${MAGENTA}📺 HƯỚNG DẪN KẾT NỐI TIVI${NC}\n"
+        echo -e "${CYAN}🎮 Điều khiển:${NC} ${YELLOW}↑ lên trên cùng${NC} → ${WHITE}Cài đặt ⚙${NC}"
+        echo -e "${CYAN}🌐 Ngôn ngữ :${NC} ${YELLOW}↓ 4 lần${NC} → ${WHITE}Language${NC} → ${GREEN}English${NC}"
+        echo -e "${CYAN}🔓 Developer:${NC} ${WHITE}About${NC} → ${YELLOW}Model${NC} → ${GREEN}OK 9 lần${NC}"
+        echo -e "${CYAN}⚙️  Quyền    :${NC} ${GREEN}ADB Debugging${NC} + ${GREEN}Unknown Sources${NC}"
+        echo -e "${CYAN}⛔ Lưu ý    :${NC} ${RED}Tắt Update tự động${NC}"
+        echo -e "${CYAN}📶 Thiết bị :${NC} ${YELLOW}${DEVICE_IP}${NC} | ${GREEN}Android ${ANDROID}${NC}"
+        echo ""
+        echo -e "${BLUE}────────────────────────────${NC}"
         read -p "$(echo -e "${GREEN}📶 Nhập IP Tivi:${NC} ")" RAW_IP
         [ -z "$RAW_IP" ] && continue
 
         [[ "$RAW_IP" != *":5555" ]] && DEVICE_IP="${RAW_IP}:5555" || DEVICE_IP="$RAW_IP"
 
         local retry_count=0
-        local max_retries=2
+        local max_retries=5
         local connected=false
 
         while [ $retry_count -le $max_retries ]; do
@@ -101,7 +111,7 @@ menu1() {
             menu2
             break 
         else
-            echo -e "${RED}⛔ Đã thử 3 lần thất bại. Vui lòng kiểm tra lại IP hoặc ADB Debugging trên TV.${NC}"
+            echo -e "${RED}⛔ Đã thử 5 lần thất bại. Vui lòng kiểm tra lại IP hoặc ADB Debugging trên TV.${NC}"
             sleep 3
             # Không dùng exit, chỉ tiếp tục vòng lặp while true để quay lại nhập IP
         fi
@@ -114,6 +124,13 @@ menu2() {
         print_header
         echo -e "📱 TV đang kết nối tại: ${GREEN}$DEVICE_IP${NC}"
         echo
+		MODEL=$($ADB_COMMAND shell getprop ro.product.model | tr -d '\r')
+        BRAND=$($ADB_COMMAND shell getprop ro.product.brand | tr -d '\r')
+        ANDROID=$($ADB_COMMAND shell getprop ro.build.version.release | tr -d '\r')
+        SDK=$($ADB_COMMAND shell getprop ro.build.version.sdk | tr -d '\r')
+        BUILD=$($ADB_COMMAND shell getprop ro.build.version.incremental | tr -d '\r')
+        PANEL=$($ADB_COMMAND shell getprop ro.boot.mi.panel_size 2>/dev/null | tr -d '\r')
+        SERIAL=$($ADB_COMMAND shell getprop ro.serialno | tr -d '\r')
 		echo -e "${YELLOW}────────────────────────────────────────${NC}"
         echo -e "${CYAN}📱 ${BRAND} ${MODEL}${NC} | 📺Tivi ${PANEL:-N/A}Inch"
         echo -e "${CYAN}🤖 Android ${ANDROID} (API ${SDK})${NC} | ⚙️ ${BUILD}"
